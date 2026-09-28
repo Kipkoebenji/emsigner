@@ -125,28 +125,25 @@ model Signature {
   @@unique([documentSignerId])
 }
 
-model SigningKey {
-  id String @id @default(uuid())
-
-  userId String
-
-  keyId String @unique
-
-  publicKey String
-
-  algorithm String
-
-  certificateUrl String?
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  revokedAt DateTime?
-
-  user User @relation(fields: [userId], references: [id])
-
-  signatures Signature[]
-}
+   model SigningKey {
+     id                  String    @id @default(uuid())
+     userId              String
+     user                User      @relation(fields: [userId], references: [id])
+    signatures          Signature[]
+     algorithm           String
+     certPem             String
+     chainPem            String
+     certSerial          String    @unique
+     certFingerprint     String
+     notBefore           DateTime
+     notAfter            DateTime
+     encryptedPrivateKey Bytes
+     wrappedDek          Bytes
+     kekId               String
+     createdAt           DateTime  @default(now())
+     revokedAt           DateTime?
+     @@index([userId])
+   }
 
 model AuditLog {
   id String @id @default(uuid())
