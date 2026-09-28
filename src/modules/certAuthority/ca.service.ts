@@ -36,7 +36,10 @@ function loadIntermediate() {
   if (!pass) throw new Error("INTERMEDIATE_CA_PASSPHRASE is not set");
 
   // In production, read these from your secrets manager instead of disk.
-  const certPem = fs.readFileSync(path.join(dir, "intermediate-ca.crt"), "utf8");
+  const certPem = fs.readFileSync(
+    path.join(dir, "intermediate-ca.crt"),
+    "utf8",
+  );
   const keyPem = fs.readFileSync(path.join(dir, "intermediate-ca.key"), "utf8");
 
   return {
@@ -55,11 +58,14 @@ export function issueUserCertificate(user: UserIdentity): IssuedCertificate {
   cert.serialNumber = randomSerial();
   cert.validity.notBefore = new Date(Date.now() - 5 * 60 * 1000);
   cert.validity.notAfter = new Date(
-    Math.min(yearsFromNow(2).getTime(), intermediate.cert.validity.notAfter.getTime())
+    Math.min(
+      yearsFromNow(2).getTime(),
+      intermediate.cert.validity.notAfter.getTime(),
+    ),
   );
 
   cert.setSubject(
-    subject(user.name, [{ name: "emailAddress", value: user.email }])
+    subject(user.name, [{ name: "emailAddress", value: user.email }]),
   );
   cert.setIssuer(intermediate.cert.subject.attributes);
 
@@ -71,11 +77,17 @@ export function issueUserCertificate(user: UserIdentity): IssuedCertificate {
       nonRepudiation: true, // a.k.a. contentCommitment - required for document signing
       critical: true,
     },
-    { name: "extKeyUsage", emailProtection: true, [ADOBE_PDF_SIGNING_EKU]: true },
+    {
+      name: "extKeyUsage",
+      emailProtection: true,
+      [ADOBE_PDF_SIGNING_EKU]: true,
+    },
     { name: "subjectKeyIdentifier" },
     {
       name: "authorityKeyIdentifier",
-      keyIdentifier: intermediate.cert.generateSubjectKeyIdentifier().getBytes(),
+      keyIdentifier: intermediate.cert
+        .generateSubjectKeyIdentifier()
+        .getBytes(),
     },
     { name: "subjectAltName", altNames: [{ type: 1, value: user.email }] },
   ]);
